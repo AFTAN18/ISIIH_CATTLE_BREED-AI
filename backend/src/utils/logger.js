@@ -79,7 +79,12 @@ export const logger = winston.createLogger({
   level: level(),
   levels,
   format: fileFormat,
-  transports,
+  transports: [
+    // Console transport only for now
+    new winston.transports.Console({
+      format,
+    })
+  ],
   exitOnError: false,
 });
 

@@ -86,6 +86,7 @@ export const dbHelpers = {
   }
 };
 
+
 // Initialize database tables if they don't exist
 export const initializeDatabase = async () => {
   try {

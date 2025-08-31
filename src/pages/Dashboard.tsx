@@ -140,81 +140,88 @@ const Dashboard = () => {
     >
       {/* Header */}
       <motion.header 
-        className="bg-gradient-primary text-primary-foreground p-6 shadow-medium"
+        className="bg-gradient-primary text-primary-foreground p-4 sm:p-6 shadow-medium"
         variants={itemVariants}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <motion.h1 
-              className="text-3xl font-bold"
-              initial={{ x: -20, opacity: 0 }}
+        <div className="container-responsive">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex-1">
+              <motion.h1 
+                className="text-responsive-2xl font-bold"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                {t('dashboard.welcomeBack')}
+              </motion.h1>
+              <motion.p 
+                className="text-primary-foreground/80 text-responsive-base"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {t('dashboard.readyToIdentify')}
+              </motion.p>
+            </div>
+            <motion.div 
+              className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto"
+              initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.4 }}
             >
-              {t('dashboard.welcomeBack')}
-            </motion.h1>
-            <motion.p 
-              className="text-primary-foreground/80 text-lg"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              {t('dashboard.readyToIdentify')}
-            </motion.p>
+              <LanguageSelector variant="dropdown" className="text-primary-foreground flex-1 sm:flex-none" />
+              {isOnline ? (
+                <Badge variant="secondary" className="bg-success text-success-foreground animate-bounce-gentle touch-friendly">
+                  <Wifi className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">{t('common.online')}</span>
+                </Badge>
+              ) : (
+                <Badge variant="destructive" className="touch-friendly">
+                  <WifiOff className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">{t('common.offline')}</span>
+                </Badge>
+              )}
+            </motion.div>
           </div>
-          <motion.div 
-            className="flex items-center gap-3"
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <LanguageSelector variant="dropdown" className="text-primary-foreground" />
-            {isOnline ? (
-              <Badge variant="secondary" className="bg-success text-success-foreground animate-bounce-gentle">
-                <Wifi className="w-4 h-4 mr-1" />
-                {t('common.online')}
-              </Badge>
-            ) : (
-              <Badge variant="destructive">
-                <WifiOff className="w-4 h-4 mr-1" />
-                {t('common.offline')}
-              </Badge>
-            )}
-          </motion.div>
         </div>
       </motion.header>
 
       {/* Quick Action */}
       <motion.div 
-        className="p-6"
+        className="p-4 sm:p-6"
         variants={itemVariants}
       >
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Button
-            onClick={() => navigate('/camera')}
-            className="w-full h-20 text-xl font-semibold bg-gradient-primary hover:bg-primary-hover shadow-glow touch-target"
-            size="lg"
+        <div className="container-responsive">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Camera className="w-8 h-8 mr-3" />
-            {t('dashboard.identifyNewBreed')}
-          </Button>
-        </motion.div>
+            <Button
+              onClick={() => navigate('/camera')}
+              className="btn-responsive w-full h-16 sm:h-20 text-responsive-lg font-semibold bg-gradient-primary hover:bg-primary-hover shadow-glow touch-friendly"
+              size="lg"
+            >
+              <Camera className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3" />
+              {t('dashboard.identifyNewBreed')}
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="px-6 space-y-6">
-        <motion.h2 
-          className="text-2xl font-semibold text-foreground flex items-center gap-2"
-          variants={itemVariants}
-        >
-          <BarChart3 className="w-6 h-6 text-primary" />
-          {t('dashboard.yourStatistics')}
-        </motion.h2>
+      <div className="px-4 sm:px-6 space-y-4 sm:space-y-6">
+        <div className="container-responsive">
+          <motion.h2 
+            className="text-responsive-xl font-semibold text-foreground flex items-center gap-2"
+            variants={itemVariants}
+          >
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            {t('dashboard.yourStatistics')}
+          </motion.h2>
+        </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="container-responsive">
+          <div className="grid-responsive-2 gap-3 sm:gap-4">
           {[
             { icon: Calendar, value: stats.todayCount, label: t('dashboard.today'), color: 'text-primary' },
             { icon: TrendingUp, value: stats.weekCount, label: t('dashboard.thisWeek'), color: 'text-accent' },
@@ -227,55 +234,61 @@ const Dashboard = () => {
               whileHover={{ y: -5, scale: 1.02 }}
               className="card-hover"
             >
-              <Card className="shadow-soft border-0">
-                <CardContent className="p-4 text-center">
-                  <stat.icon className={`w-8 h-8 ${stat.color} mx-auto mb-2`} />
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <Card className="card-responsive shadow-soft border-0">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <stat.icon className={`w-6 h-6 sm:w-8 sm:h-8 ${stat.color} mx-auto mb-2`} />
+                  <p className="text-responsive-xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-responsive-sm text-muted-foreground">{stat.label}</p>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
 
+          </div>
+        </div>
+
         {/* Progress Section */}
-        <motion.div variants={cardVariants}>
-          <Card className="shadow-soft border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-primary" />
-                {t('dashboard.monthlyProgress')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span>{t('dashboard.registrations')}: {stats.monthCount}/{stats.weeklyGoal}</span>
-                  <span>{Math.round((stats.monthCount / stats.weeklyGoal) * 100)}%</span>
+        <div className="container-responsive">
+          <motion.div variants={cardVariants}>
+            <Card className="card-responsive shadow-soft border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-responsive-base flex items-center gap-2">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  {t('dashboard.monthlyProgress')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-responsive-sm">
+                    <span>{t('dashboard.registrations')}: {stats.monthCount}/{stats.weeklyGoal}</span>
+                    <span>{Math.round((stats.monthCount / stats.weeklyGoal) * 100)}%</span>
+                  </div>
+                  <Progress 
+                    value={(stats.monthCount / stats.weeklyGoal) * 100} 
+                    className="h-2 sm:h-3 bg-muted"
+                  />
+                  <p className="text-responsive-xs text-muted-foreground">
+                    {t('dashboard.greatProgress', { remaining: stats.weeklyGoal - stats.monthCount })}
+                  </p>
                 </div>
-                <Progress 
-                  value={(stats.monthCount / stats.weeklyGoal) * 100} 
-                  className="h-3 bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.greatProgress', { remaining: stats.weeklyGoal - stats.monthCount })}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Charts Section */}
-        <motion.div variants={cardVariants}>
-          <Card className="shadow-soft border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                {t('dashboard.weeklyPerformance')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
+        <div className="container-responsive">
+          <motion.div variants={cardVariants}>
+            <Card className="card-responsive shadow-soft border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-responsive-base flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  {t('dashboard.weeklyPerformance')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={weeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -297,134 +310,141 @@ const Dashboard = () => {
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Recent Activity */}
-        <motion.div variants={cardVariants}>
-          <Card className="shadow-soft border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <History className="w-5 h-5 text-primary" />
-                {t('dashboard.recentRegistrations')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recentRegistrations.map((item, index) => (
-                <motion.div 
-                  key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{item.image}</span>
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{item.breed}</p>
-                      <p className="text-sm text-muted-foreground">{item.time}</p>
+        <div className="container-responsive">
+          <motion.div variants={cardVariants}>
+            <Card className="card-responsive shadow-soft border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-responsive-base flex items-center gap-2">
+                  <History className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  {t('dashboard.recentRegistrations')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {recentRegistrations.map((item, index) => (
+                  <motion.div 
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                      <span className="text-xl sm:text-2xl">{item.image}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-responsive-sm text-foreground truncate">{item.breed}</p>
+                        <p className="text-responsive-xs text-muted-foreground">{item.time}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={item.confidence >= 90 ? "default" : "secondary"}>
-                      {item.confidence}%
-                    </Badge>
-                    {item.verified && (
-                      <Badge variant="outline" className="text-success border-success">
-                        <Star className="w-3 h-3 mr-1" />
-                        {t('common.verified')}
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                      <Badge variant={item.confidence >= 90 ? "default" : "secondary"} className="text-xs">
+                        {item.confidence}%
                       </Badge>
-                    )}
-                  </div>
-                </motion.div>
-            ))}
-            
-            <Button variant="outline" className="w-full">
-              {t('dashboard.viewAllHistory')}
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div>
+                      {item.verified && (
+                        <Badge variant="outline" className="text-success border-success text-xs hidden sm:flex">
+                          <Star className="w-3 h-3 mr-1" />
+                          {t('common.verified')}
+                        </Badge>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+                
+                <Button variant="outline" className="btn-responsive w-full">
+                  {t('dashboard.viewAllHistory')}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
-      {/* Achievements */}
-      <motion.div variants={cardVariants}>
-        <Card className="shadow-soft border-0">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              {t('dashboard.achievements')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              {achievements.map((achievement) => (
-                <motion.div
-                  key={achievement.id}
-                  whileHover={{ scale: 1.05 }}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    achievement.unlocked 
-                      ? 'border-success bg-success/10' 
-                      : 'border-muted bg-muted/30 opacity-50'
-                  }`}
-                >
-                  <div className="text-center">
-                    <span className="text-2xl">{achievement.icon}</span>
-                    <p className="font-medium text-sm mt-1">{achievement.title}</p>
-                    <p className="text-xs text-muted-foreground">{achievement.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+        {/* Achievements */}
+        <div className="container-responsive">
+          <motion.div variants={cardVariants}>
+            <Card className="card-responsive shadow-soft border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-responsive-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  {t('dashboard.achievements')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid-responsive-2 gap-2 sm:gap-3">
+                  {achievements.map((achievement) => (
+                    <motion.div
+                      key={achievement.id}
+                      whileHover={{ scale: 1.05 }}
+                      className={`p-2 sm:p-3 rounded-lg border-2 transition-all touch-friendly ${
+                        achievement.unlocked 
+                          ? 'border-success bg-success/10' 
+                          : 'border-muted bg-muted/30 opacity-50'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <span className="text-xl sm:text-2xl">{achievement.icon}</span>
+                        <p className="font-medium text-responsive-xs mt-1">{achievement.title}</p>
+                        <p className="text-responsive-xs text-muted-foreground">{achievement.description}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Learning Resources */}
-        <motion.div variants={cardVariants}>
-          <Card className="shadow-soft border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                {t('dashboard.learningResources')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start h-auto p-3"
-                  onClick={() => navigate('/learning')}
-                >
-                  <BookOpen className="w-4 h-4 mr-3" />
-                  <div className="text-left">
-                    <p className="font-medium">{t('dashboard.learningCenter')}</p>
-                    <p className="text-sm text-muted-foreground">{t('dashboard.learningCenterDesc')}</p>
-                  </div>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start h-auto p-3"
-                  onClick={() => navigate('/manual-identification')}
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  <div className="text-left">
-                    <p className="font-medium">{t('dashboard.manualIdentification')}</p>
-                    <p className="text-sm text-muted-foreground">{t('dashboard.manualIdentificationDesc')}</p>
-                  </div>
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-auto p-3">
-                  <Camera className="w-4 h-4 mr-3" />
-                  <div className="text-left">
-                    <p className="font-medium">{t('dashboard.photoGuidelines')}</p>
-                    <p className="text-sm text-muted-foreground">{t('dashboard.photoGuidelinesDesc')}</p>
-                  </div>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="container-responsive">
+          <motion.div variants={cardVariants}>
+            <Card className="card-responsive shadow-soft border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-responsive-base flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  {t('dashboard.learningResources')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    className="btn-responsive w-full justify-start h-auto p-3 touch-friendly"
+                    onClick={() => navigate('/learning')}
+                  >
+                    <BookOpen className="w-4 h-4 mr-3 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="font-medium text-responsive-sm">{t('dashboard.learningCenter')}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{t('dashboard.learningCenterDesc')}</p>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="btn-responsive w-full justify-start h-auto p-3 touch-friendly"
+                    onClick={() => navigate('/manual-identification')}
+                  >
+                    <Target className="w-4 h-4 mr-3 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="font-medium text-responsive-sm">{t('dashboard.manualIdentification')}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{t('dashboard.manualIdentificationDesc')}</p>
+                    </div>
+                  </Button>
+                  <Button variant="ghost" className="btn-responsive w-full justify-start h-auto p-3 touch-friendly">
+                    <Camera className="w-4 h-4 mr-3 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="font-medium text-responsive-sm">{t('dashboard.photoGuidelines')}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{t('dashboard.photoGuidelinesDesc')}</p>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
       </div>
 

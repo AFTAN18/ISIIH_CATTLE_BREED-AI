@@ -158,17 +158,14 @@ app.use('*', (req, res) => {
 // Initialize services
 async function initializeServices() {
   try {
-    // Initialize database
-    await initDatabase();
-    logger.info('Database initialized successfully');
+    // Skip database initialization for now (using Supabase directly)
+    logger.info('Using Supabase database - skipping local DB init');
 
-    // Initialize Redis
-    await initRedis();
-    logger.info('Redis initialized successfully');
+    // Skip Redis for now (optional service)
+    logger.info('Redis skipped - using in-memory cache');
 
-    // Initialize queue
-    await initQueue();
-    logger.info('Queue system initialized successfully');
+    // Skip queue for now (optional service)
+    logger.info('Queue system skipped - using direct processing');
 
     // Initialize ML service
     logger.info('Simple ML service ready');
@@ -176,12 +173,13 @@ async function initializeServices() {
 
   } catch (error) {
     logger.error('Failed to initialize services:', error);
-    process.exit(1);
+    // Don't exit, continue with basic functionality
+    logger.warn('Continuing with limited functionality');
   }
 }
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const startServer = async () => {
   try {
     await initializeServices();

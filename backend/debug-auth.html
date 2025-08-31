@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Pashudhan - Auth Debug Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 4px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐄 Bharat Pashudhan - Authentication Debug Dashboard</h1>
+        
+        <div class="test-section">
+            <h2>1. Backend Health Check</h2>
+            <button onclick="checkHealth()">Check Backend Health</button>
+            <div id="healthStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Supabase Connection Test</h2>
+            <button onclick="testSupabase()">Test Supabase Connection</button>
+            <div id="supabaseStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. User Registration Test</h2>
+            <input type="text" id="regName" placeholder="Full Name" value="Test User">
+            <input type="email" id="regEmail" placeholder="Email" value="test@example.com">
+            <input type="password" id="regPassword" placeholder="Password" value="test123">
+            <input type="text" id="regPhone" placeholder="Phone" value="+91-9876543210">
+            <select id="regRole">
+                <option value="farmer">Farmer</option>
+                <option value="flw">Field Level Worker</option>
+                <option value="veterinarian">Veterinarian</option>
+                <option value="expert">Expert</option>
+            </select>
+            <button onclick="testRegister()">Test Registration</button>
+            <div id="registerStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. User Login Test</h2>
+            <input type="email" id="loginEmail" placeholder="Email" value="admin@bharatpashudhan.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="admin123">
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Debug Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="debugLog" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('debugLog');
+            logDiv.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function checkHealth() {
+            log('Checking backend health...');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showStatus('healthStatus', `✅ Backend is healthy<br>Database: ${data.database}<br>Port: ${data.port}`, 'success');
+                    log('Backend health check passed');
+                } else {
+                    showStatus('healthStatus', `❌ Backend error: ${data.message}<br>${data.suggestion || ''}`, 'error');
+                    log(`Backend health check failed: ${data.message}`);
+                }
+            } catch (error) {
+                showStatus('healthStatus', `❌ Cannot connect to backend: ${error.message}`, 'error');
+                log(`Backend connection failed: ${error.message}`);
+            }
+        }
+
+        async function testSupabase() {
+            log('Testing Supabase connection...');
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/test-connection`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus('supabaseStatus', '✅ Supabase connection successful', 'success');
+                    log('Supabase connection test passed');
+                } else {
+                    const error = await response.json();
+                    showStatus('supabaseStatus', `❌ Supabase error: ${error.message}`, 'error');
+                    log(`Supabase test failed: ${error.message}`);
+                }
+            } catch (error) {
+                showStatus('supabaseStatus', `❌ Supabase test failed: ${error.message}`, 'error');
+                log(`Supabase test error: ${error.message}`);
+            }
+        }
+
+        async function testRegister() {
+            const userData = {
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                phone: document.getElementById('regPhone').value,
+                role: document.getElementById('regRole').value,
+                location: 'Test Location',
+                region: 'Test Region',
+                state: 'Test State',
+                district: 'Test District'
+            };
+
+            log(`Testing registration for ${userData.email}...`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('registerStatus', `✅ Registration successful<br>User ID: ${data.user?.id}<br>Token: ${data.token ? 'Generated' : 'Missing'}`, 'success');
+                    log(`Registration successful for ${userData.email}`);
+                } else {
+                    showStatus('registerStatus', `❌ Registration failed: ${data.message}`, 'error');
+                    log(`Registration failed: ${data.message}`);
+                }
+            } catch (error) {
+                showStatus('registerStatus', `❌ Registration error: ${error.message}`, 'error');
+                log(`Registration error: ${error.message}`);
+            }
+        }
+
+        async function testLogin() {
+            const loginData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            log(`Testing login for ${loginData.email}...`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('loginStatus', `✅ Login successful<br>User: ${data.user?.name}<br>Role: ${data.user?.role}<br>Token: ${data.token ? 'Generated' : 'Missing'}`, 'success');
+                    log(`Login successful for ${loginData.email}`);
+                } else {
+                    showStatus('loginStatus', `❌ Login failed: ${data.message}`, 'error');
+                    log(`Login failed: ${data.message}`);
+                }
+            } catch (error) {
+                showStatus('loginStatus', `❌ Login error: ${error.message}`, 'error');
+                log(`Login error: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').textContent = '';
+        }
+
+        // Auto-run health check on page load
+        window.onload = () => {
+            log('Auth Debug Dashboard loaded');
+            setTimeout(checkHealth, 1000);
+        };
+    </script>
+</body>
+</html>

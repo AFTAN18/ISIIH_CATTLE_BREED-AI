@@ -270,20 +270,49 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-// Logout endpoint
-router.post('/logout', async (req, res) => {
+// Test connection endpoint for debugging
+router.post('/test-connection', async (req, res) => {
   try {
-    // In a real application, you might want to blacklist the token
-    // For now, we'll just return a success response
+    const { data, error } = await dbHelpers.testConnection();
+    
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Supabase connection failed',
+        error: error.message
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Supabase connection successful',
+      data
+    });
+  } catch (error) {
+    logger.error('Connection test error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Connection test failed',
+      error: error.message
+    });
+  }
+});
+
+// Logout endpoint
+router.post('/logout', authenticateToken, async (req, res) => {
+  try {
+    // In a stateless JWT system, logout is handled client-side
+    // But we can blacklist the token or clear any server-side sessions
+    
     res.json({
       success: true,
       message: 'Logged out successfully'
     });
   } catch (error) {
-    logger.error('Logout failed:', error);
+    logger.error('Logout error:', error);
     res.status(500).json({
       success: false,
-      error: 'Logout failed'
+      message: 'Logout failed'
     });
   }
 });

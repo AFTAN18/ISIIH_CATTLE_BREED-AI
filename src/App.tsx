@@ -106,25 +106,29 @@ const App = () => {
           {/* Online/Offline Status Indicator */}
           {!isOnline && (
             <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
-              <span className="text-sm font-medium">
-                You are currently offline. Some features may be limited.
-              </span>
+              <div className="container-responsive">
+                <span className="text-responsive-sm font-medium">
+                  You are currently offline. Some features may be limited.
+                </span>
+              </div>
             </div>
           )}
           
           {/* Update Available Indicator */}
           {isUpdateAvailable && (
             <div className="fixed top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 z-50">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm font-medium">
-                  A new version is available
-                </span>
-                <button
-                  onClick={() => pwaService.updateApp()}
-                  className="bg-white text-blue-500 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100"
-                >
-                  Update Now
-                </button>
+              <div className="container-responsive">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                  <span className="text-responsive-sm font-medium">
+                    A new version is available
+                  </span>
+                  <button
+                    onClick={() => pwaService.updateApp()}
+                    className="btn-responsive bg-white text-blue-500 hover:bg-gray-100 touch-friendly"
+                  >
+                    Update Now
+                  </button>
+                </div>
               </div>
             </div>
           )}
