@@ -17,7 +17,9 @@ const registerSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
-  role: Joi.string().valid('flw', 'admin', 'expert').default('flw'),
+  role: Joi.string().valid('farmer', 'veterinarian', 'expert', 'flw', 'admin').default('farmer'),
+  phone: Joi.string().optional(),
+  location: Joi.string().optional(),
   region: Joi.string().optional(),
   state: Joi.string().optional(),
   district: Joi.string().optional()
@@ -122,7 +124,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
 // Register endpoint
 router.post('/register', validateRequest(registerSchema), async (req, res) => {
   try {
-    const { name, email, password, role, region, state, district } = req.body;
+    const { name, email, password, role, phone, location, region, state, district } = req.body;
 
     // Check if user already exists
     const existingUser = users.find(u => u.email === email);
@@ -144,6 +146,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      phone,
+      location,
       region,
       state,
       district,
@@ -176,6 +180,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
           name: newUser.name,
           email: newUser.email,
           role: newUser.role,
+          phone: newUser.phone,
+          location: newUser.location,
           region: newUser.region,
           state: newUser.state,
           district: newUser.district,

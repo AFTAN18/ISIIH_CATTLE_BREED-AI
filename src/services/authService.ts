@@ -127,7 +127,7 @@ class AuthService {
       }
 
       // Make secure API call to backend
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/auth/signup`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,16 +144,18 @@ class AuthService {
         };
       }
 
-      if (responseData.success && responseData.user && responseData.accessToken) {
+      if (responseData.success && responseData.data && responseData.data.token) {
         // Store tokens securely
-        sessionStorage.setItem(this.TOKEN_KEY, responseData.accessToken);
-        sessionStorage.setItem('refresh_token', responseData.refreshToken);
-        sessionStorage.setItem(this.USER_KEY, JSON.stringify(responseData.user));
+        sessionStorage.setItem(this.TOKEN_KEY, responseData.data.token);
+        if (responseData.data.refreshToken) {
+          sessionStorage.setItem('refresh_token', responseData.data.refreshToken);
+        }
+        sessionStorage.setItem(this.USER_KEY, JSON.stringify(responseData.data.user));
 
         return {
           success: true,
-          user: responseData.user,
-          token: responseData.accessToken,
+          user: responseData.data.user,
+          token: responseData.data.token,
           message: 'Account created successfully'
         };
       }
