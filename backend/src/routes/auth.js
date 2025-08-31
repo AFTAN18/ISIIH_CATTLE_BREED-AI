@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger.js';
 import { validateRequest } from '../middleware/validation.js';
+import { dbHelpers, initializeDatabase } from '../config/supabase.js';
 import Joi from 'joi';
 
 const router = express.Router();
@@ -25,41 +26,16 @@ const registerSchema = Joi.object({
   district: Joi.string().optional()
 });
 
-// Mock user database (in production, this would be a real database)
-const users = [
-  {
-    id: '1',
-    name: 'Field Worker 1',
-    email: 'flw1@example.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-    role: 'flw',
-    region: 'North',
-    state: 'Punjab',
-    district: 'Amritsar',
-    createdAt: new Date('2024-01-01'),
-    lastLogin: new Date('2024-01-15')
-  },
-  {
-    id: '2',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-    role: 'admin',
-    region: 'Central',
-    state: 'Delhi',
-    district: 'New Delhi',
-    createdAt: new Date('2024-01-01'),
-    lastLogin: new Date('2024-01-15')
-  }
-];
+// Initialize database on startup
+initializeDatabase();
 
 // Login endpoint
 router.post('/login', validateRequest(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = users.find(u => u.email === email);
+    // Find user in Supabase
+    const user = await dbHelpers.findUserByEmail(email);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -69,7 +45,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
@@ -91,7 +67,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
     );
 
     // Update last login
-    user.lastLogin = new Date();
+    await dbHelpers.updateLastLogin(user.id);
 
     logger.info('User logged in successfully', { userId: user.id, email: user.email });
 
@@ -104,10 +80,12 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          phone: user.phone,
+          location: user.location,
           region: user.region,
           state: user.state,
           district: user.district,
-          lastLogin: user.lastLogin
+          lastLogin: new Date().toISOString()
         }
       }
     });
@@ -127,7 +105,7 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
     const { name, email, password, role, phone, location, region, state, district } = req.body;
 
     // Check if user already exists
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = await dbHelpers.findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -139,9 +117,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const newUser = {
-      id: (users.length + 1).toString(),
+    // Create new user in Supabase
+    const newUser = await dbHelpers.createUser({
       name,
       email,
       password: hashedPassword,
@@ -150,12 +127,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       location,
       region,
       state,
-      district,
-      createdAt: new Date(),
-      lastLogin: null
-    };
-
-    users.push(newUser);
+      district
+    });
 
     // Generate JWT token
     const token = jwt.sign(
@@ -185,7 +158,7 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
           region: newUser.region,
           state: newUser.state,
           district: newUser.district,
-          createdAt: newUser.createdAt
+          createdAt: newUser.created_at
         }
       }
     });
@@ -214,7 +187,7 @@ router.get('/profile', async (req, res) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
-    const user = users.find(u => u.id === decoded.id);
+    const user = await dbHelpers.getUserById(decoded.id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -229,11 +202,13 @@ router.get('/profile', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        location: user.location,
         region: user.region,
         state: user.state,
         district: user.district,
-        createdAt: user.createdAt,
-        lastLogin: user.lastLogin
+        createdAt: user.created_at,
+        lastLogin: user.last_login
       }
     });
   } catch (error) {
@@ -260,7 +235,7 @@ router.post('/refresh', async (req, res) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
-    const user = users.find(u => u.id === decoded.id);
+    const user = await dbHelpers.getUserById(decoded.id);
     if (!user) {
       return res.status(404).json({
         success: false,
