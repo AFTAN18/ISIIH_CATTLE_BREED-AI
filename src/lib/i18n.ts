@@ -4,18 +4,18 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
 // Import all translation files
-import en from '../locales/en.json';
-import hi from '../locales/hi.json';
-import ta from '../locales/ta.json';
-import te from '../locales/te.json';
-import mr from '../locales/mr.json';
-import gu from '../locales/gu.json';
-import bn from '../locales/bn.json';
-import kn from '../locales/kn.json';
-import ml from '../locales/ml.json';
-import pa from '../locales/pa.json';
-import or from '../locales/or.json';
-import ur from '../locales/ur.json';
+import en from '../i18n/locales/en.json';
+import hi from '../i18n/locales/hi.json';
+import ta from '../i18n/locales/ta.json';
+import te from '../i18n/locales/te.json';
+import mr from '../i18n/locales/mr.json';
+import gu from '../i18n/locales/gu.json';
+import bn from '../i18n/locales/bn.json';
+import kn from '../i18n/locales/kn.json';
+import ml from '../i18n/locales/ml.json';
+import pa from '../i18n/locales/pa.json';
+import or from '../i18n/locales/or.json';
+import ur from '../i18n/locales/ur.json';
 
 const resources = {
   en: { translation: en },

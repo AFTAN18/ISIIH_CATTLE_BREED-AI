@@ -69,15 +69,17 @@ const CameraCapture = () => {
         
         // Check if getUserMedia is supported
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Camera not supported');
+          setIsCameraActive(false);
+          setIsInitializing(false);
+          return;
         }
 
-        // Request camera permissions directly
+        // Request camera permissions with fallback constraints
         const constraints = {
           video: {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            facingMode: 'environment'
+            width: { ideal: window.innerWidth > 768 ? 1920 : 1280 },
+            height: { ideal: window.innerWidth > 768 ? 1080 : 720 },
+            facingMode: window.innerWidth <= 768 ? 'environment' : 'user'
           },
           audio: false
         };
@@ -93,19 +95,10 @@ const CameraCapture = () => {
           };
         }
         
-        toast({
-          title: t('camera.cameraReady'),
-          description: t('camera.readyToCapture'),
-        });
-        
       } catch (error) {
         console.error('Camera initialization failed:', error);
         setIsCameraActive(false);
-        toast({
-          title: t('camera.cameraError'),
-          description: t('camera.cameraPermissionMessage'),
-          variant: "destructive"
-        });
+        // Don't show error toast during initialization - let user try manually
       } finally {
         setIsInitializing(false);
       }
@@ -118,7 +111,7 @@ const CameraCapture = () => {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [toast, t]);
+  }, []);
 
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !isCameraActive) return;
@@ -308,7 +301,7 @@ const CameraCapture = () => {
       </motion.header>
 
       {/* Camera Viewfinder */}
-      <div className="flex-1 relative bg-muted/20">
+      <div className="flex-1 relative bg-muted/20 min-h-0">
         <AnimatePresence mode="wait">
           {showPreview && capturedImage ? (
             /* Photo Preview Mode */
@@ -360,7 +353,7 @@ const CameraCapture = () => {
                     {/* Target Frame */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <motion.div 
-                        className="relative w-80 h-60 border-2 border-primary border-dashed rounded-2xl flex items-center justify-center bg-card/10 backdrop-blur-sm"
+                        className="relative w-64 h-48 sm:w-80 sm:h-60 md:w-96 md:h-72 border-2 border-primary border-dashed rounded-2xl flex items-center justify-center bg-card/10 backdrop-blur-sm"
                         animate={{ 
                           boxShadow: [
                             "0 0 0 0 rgba(var(--primary), 0.4)",
@@ -392,17 +385,64 @@ const CameraCapture = () => {
                   </div>
                 </div>
               ) : (
-                /* Loading Camera View */
-                <div className="h-full camera-overlay flex items-center justify-center">
-                  <div className="relative w-80 h-60 border-2 border-primary border-dashed rounded-2xl flex items-center justify-center bg-card/10 backdrop-blur-sm">
+                /* Camera Activation View */
+                <div className="h-full camera-overlay flex items-center justify-center p-4">
+                  <div className="relative w-full max-w-md border-2 border-primary border-dashed rounded-2xl flex items-center justify-center bg-card/10 backdrop-blur-sm p-8">
                     <div className="text-center">
-                      <Camera className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
-                      <p className="text-sm text-foreground font-medium">
+                      <Camera className="w-16 h-16 text-primary mx-auto mb-4" />
+                      <p className="text-lg text-foreground font-medium mb-2">
                         {isInitializing ? t('camera.initializing') : t('camera.cameraNotReady')}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('camera.pleaseAllowAccess')}
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {isInitializing ? t('camera.settingUp') : t('camera.activateCamera')}
                       </p>
+                      {!isInitializing && !isCameraActive && (
+                        <Button
+                          onClick={async () => {
+                            setIsInitializing(true);
+                            try {
+                              const constraints = {
+                                video: {
+                                  width: { ideal: window.innerWidth > 768 ? 1920 : 1280 },
+                                  height: { ideal: window.innerWidth > 768 ? 1080 : 720 },
+                                  facingMode: window.innerWidth <= 768 ? 'environment' : 'user'
+                                },
+                                audio: false
+                              };
+                              const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                              setStream(mediaStream);
+                              setIsCameraActive(true);
+                              if (videoRef.current && mediaStream) {
+                                videoRef.current.srcObject = mediaStream;
+                                videoRef.current.onloadedmetadata = () => {
+                                  videoRef.current?.play().catch(console.error);
+                                };
+                              }
+                              toast({
+                                title: t('camera.cameraReady'),
+                                description: t('camera.readyToCapture'),
+                              });
+                            } catch (error) {
+                              toast({
+                                title: t('camera.cameraError'),
+                                description: t('camera.cameraPermissionMessage'),
+                                variant: "destructive"
+                              });
+                            } finally {
+                              setIsInitializing(false);
+                            }
+                          }}
+                          className="bg-gradient-primary hover:bg-primary-hover"
+                          disabled={isInitializing}
+                        >
+                          {isInitializing ? (
+                            <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent mr-2" />
+                          ) : (
+                            <Camera className="w-4 h-4 mr-2" />
+                          )}
+                          {t('camera.activateCamera')}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -410,57 +450,60 @@ const CameraCapture = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Hidden canvas for capture */}
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* View Selector */}
-        <motion.div 
-          className="absolute top-4 left-4 right-4"
-          variants={itemVariants}
-        >
-          <div className="flex gap-2 justify-center">
-            {captureViews.map((view) => (
-              <motion.div
-                key={view.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant={currentView === view.id ? "default" : "secondary"}
-                  size="sm"
-                  onClick={() => setCurrentView(view.id)}
-                  className="flex items-center gap-2 shadow-soft"
+        {/* View Selector - Only show when camera is active */}
+        {isCameraActive && (
+          <motion.div 
+            className="absolute top-4 left-4 right-4 z-10"
+            variants={itemVariants}
+          >
+            <div className="flex gap-2 justify-center flex-wrap">
+              {captureViews.map((view) => (
+                <motion.div
+                  key={view.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {view.icon}
-                  {view.label}
-                  {view.primary && <Badge variant="outline" className="ml-1 text-xs">{t('camera.best')}</Badge>}
-                </Button>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Tips Carousel */}
-        <motion.div 
-          className="absolute bottom-32 left-4 right-4"
-          variants={itemVariants}
-        >
-          <Card className="p-4 bg-card/95 backdrop-blur-sm shadow-medium border-0">
-            <div className="flex items-center gap-3">
-              <Lightbulb className="w-5 h-5 text-accent flex-shrink-0" />
-              <p className="text-sm font-medium flex-1">{tips[currentTip]}</p>
-              <Button variant="ghost" size="sm" onClick={nextTip}>
-                <RotateCw className="w-4 h-4" />
-              </Button>
+                  <Button
+                    variant={currentView === view.id ? "default" : "secondary"}
+                    size="sm"
+                    onClick={() => setCurrentView(view.id as 'side' | 'front' | 'rear')}
+                    className="flex items-center gap-1 sm:gap-2 shadow-soft text-xs sm:text-sm px-2 sm:px-3"
+                  >
+                    <span className="hidden sm:inline">{view.icon}</span>
+                    {view.label}
+                    {view.primary && <Badge variant="outline" className="ml-1 text-xs hidden sm:inline">{t('camera.best')}</Badge>}
+                  </Button>
+                </motion.div>
+              ))}
             </div>
-          </Card>
-        </motion.div>
+          </motion.div>
+        )}
+
+        {/* Tips Carousel - Only show when camera is active */}
+        {isCameraActive && (
+          <motion.div 
+            className="absolute bottom-32 sm:bottom-36 left-4 right-4 z-10"
+            variants={itemVariants}
+          >
+            <Card className="p-3 sm:p-4 bg-card/95 backdrop-blur-sm shadow-medium border-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
+                <p className="text-xs sm:text-sm font-medium flex-1 leading-tight">{tips[currentTip]}</p>
+                <Button variant="ghost" size="sm" onClick={nextTip} className="p-1 sm:p-2">
+                  <RotateCw className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        )}
       </div>
 
       {/* Controls */}
       <motion.div 
-        className="p-6 bg-card shadow-medium"
+        className="p-4 sm:p-6 bg-card shadow-medium safe-area-bottom"
         variants={itemVariants}
       >
         <AnimatePresence mode="wait">
@@ -512,16 +555,16 @@ const CameraCapture = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center justify-center gap-3 sm:gap-6">
                 {/* Gallery Upload */}
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     variant="outline"
                     size="lg"
                     onClick={handleGalleryUpload}
-                    className="w-16 h-16 rounded-full touch-target shadow-soft"
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full touch-target shadow-soft"
                   >
-                    <ImageIcon className="w-6 h-6" />
+                    <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </Button>
                 </motion.div>
 
@@ -533,7 +576,7 @@ const CameraCapture = () => {
                   <Button
                     onClick={handleCapture}
                     disabled={isCapturing || !isCameraActive || isInitializing}
-                    className="w-24 h-24 rounded-full bg-gradient-primary hover:bg-primary-hover capture-button touch-target shadow-glow"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-primary hover:bg-primary-hover capture-button touch-target shadow-glow"
                     size="lg"
                   >
                     {isCapturing ? (
@@ -549,11 +592,34 @@ const CameraCapture = () => {
                   <Button
                     variant="outline"
                     size="lg"
-                    onClick={() => cameraService.switchCamera()}
+                    onClick={async () => {
+                      if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                      }
+                      try {
+                        const constraints = {
+                          video: {
+                            width: { ideal: window.innerWidth > 768 ? 1920 : 1280 },
+                            height: { ideal: window.innerWidth > 768 ? 1080 : 720 },
+                            facingMode: window.innerWidth <= 768 ? 
+                              (stream?.getVideoTracks()[0]?.getSettings()?.facingMode === 'environment' ? 'user' : 'environment') :
+                              'user'
+                          },
+                          audio: false
+                        };
+                        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+                        setStream(newStream);
+                        if (videoRef.current) {
+                          videoRef.current.srcObject = newStream;
+                        }
+                      } catch (error) {
+                        console.error('Camera switch failed:', error);
+                      }
+                    }}
                     disabled={!isCameraActive}
-                    className="w-16 h-16 rounded-full touch-target shadow-soft"
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full touch-target shadow-soft"
                   >
-                    <RotateCcw className="w-6 h-6" />
+                    <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
                   </Button>
                 </motion.div>
               </div>

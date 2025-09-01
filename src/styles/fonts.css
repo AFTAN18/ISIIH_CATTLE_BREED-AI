@@ -1,0 +1,38 @@
+/* Import Google Fonts for all supported Indian languages */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap');
+
+/* Base font classes */
+.font-english { font-family: 'Noto Sans', sans-serif; }
+.font-hindi { font-family: 'Noto Sans Devanagari', sans-serif; }
+.font-tamil { font-family: 'Noto Sans Tamil', sans-serif; }
+.font-telugu { font-family: 'Noto Sans Telugu', sans-serif; }
+.font-bengali { font-family: 'Noto Sans Bengali', sans-serif; }
+.font-gujarati { font-family: 'Noto Sans Gujarati', sans-serif; }
+.font-kannada { font-family: 'Noto Sans Kannada', sans-serif; }
+.font-malayalam { font-family: 'Noto Sans Malayalam', sans-serif; }
+.font-punjabi { font-family: 'Noto Sans Gurmukhi', sans-serif; }
+.font-odia { font-family: 'Noto Sans Oriya', sans-serif; }
+.font-urdu { font-family: 'Noto Nastaliq Urdu', sans-serif; }
+
+/* RTL support */
+[dir='rtl'] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Smooth font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

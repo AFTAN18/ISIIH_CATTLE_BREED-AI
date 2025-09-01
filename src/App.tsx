@@ -3,11 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { languages } from "@/lib/i18n";
 import pwaService, { PWAService } from "@/services/pwaService";
 import offlineStorage from "@/services/offlineStorage";
+import "./styles/fonts.css"; // Import fonts
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
@@ -22,20 +22,36 @@ import DataManagement from "./pages/DataManagement";
 import ManualIdentification from "./pages/ManualIdentification";
 import BreedPhotoDatabase from "./components/BreedPhotoDatabase";
 import LearningQuiz from "./components/LearningQuiz";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 // Import i18n configuration
 import "@/lib/i18n";
 
-const queryClient = new QueryClient();
-
 const App = () => {
+  const [pwaServiceState, setPwaService] = useState<PWAService | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { i18n } = useTranslation();
+  const queryClient = useMemo(() => new QueryClient(), []);
+
+  // Set document direction based on language
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = i18n.language === 'ur' ? 'rtl' : 'ltr';
+    
+    // Add language class to body for font styling
+    const languageCode = i18n.language.split('-')[0];
+    document.body.className = `font-${languageCode}`;
+    
+    // Handle RTL for Arabic and other RTL languages
+    if (i18n.language === 'ur') {
+      document.body.classList.add('rtl');
+    } else {
+      document.body.classList.remove('rtl');
+    }
+  }, [i18n.language]);
+
   const [showSplash, setShowSplash] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
-  const { i18n } = useTranslation();
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -89,11 +105,8 @@ const App = () => {
     const savedLanguage = localStorage.getItem('preferredLanguage');
     if (savedLanguage) {
       i18n.changeLanguage(savedLanguage);
-      const currentLang = languages.find(lang => lang.code === savedLanguage);
-      if (currentLang) {
-        document.documentElement.dir = currentLang.rtl ? 'rtl' : 'ltr';
-        document.documentElement.lang = savedLanguage;
-      }
+      document.documentElement.dir = savedLanguage === 'ur' ? 'rtl' : 'ltr';
+      document.documentElement.lang = savedLanguage;
     }
   }, [i18n]);
 
@@ -134,87 +147,21 @@ const App = () => {
           )}
           
           <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={
-              <ProtectedRoute requireAuth={false}>
-                <Login />
-              </ProtectedRoute>
-            } />
-            <Route path="/signup" element={
-              <ProtectedRoute requireAuth={false}>
-                <Signup />
-              </ProtectedRoute>
-            } />
-            
-            {/* Protected Routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                {showSplash ? <SplashScreen /> : <Dashboard />}
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/camera" element={
-              <ProtectedRoute>
-                <CameraCapture />
-              </ProtectedRoute>
-            } />
-            <Route path="/breed-results" element={
-              <ProtectedRoute>
-                <BreedResults />
-              </ProtectedRoute>
-            } />
-            <Route path="/results" element={
-              <ProtectedRoute>
-                <BreedResults />
-              </ProtectedRoute>
-            } />
-            <Route path="/manual-selection" element={
-              <ProtectedRoute>
-                <ManualSelection />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <AnimalProfile />
-              </ProtectedRoute>
-            } />
-            <Route path="/learning" element={
-              <ProtectedRoute>
-                <LearningCenter />
-              </ProtectedRoute>
-            } />
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <AnalyticsDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/data-management" element={
-              <ProtectedRoute>
-                <DataManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="/manual-identification" element={
-              <ProtectedRoute>
-                <ManualIdentification />
-              </ProtectedRoute>
-            } />
-            <Route path="/photo-database" element={
-              <ProtectedRoute>
-                <BreedPhotoDatabase />
-              </ProtectedRoute>
-            } />
-            <Route path="/quiz" element={
-              <ProtectedRoute>
-                <LearningQuiz />
-              </ProtectedRoute>
-            } />
+            <Route path="/" element={showSplash ? <SplashScreen /> : <Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/camera" element={<CameraCapture />} />
+            <Route path="/breed-results" element={<BreedResults />} />
+            <Route path="/results" element={<BreedResults />} />
+            <Route path="/manual-selection" element={<ManualSelection />} />
+            <Route path="/profile" element={<AnimalProfile />} />
+            <Route path="/learning" element={<LearningCenter />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/data-management" element={<DataManagement />} />
+            <Route path="/manual-identification" element={<ManualIdentification />} />
+            <Route path="/photo-database" element={<BreedPhotoDatabase />} />
+            <Route path="/quiz" element={<LearningQuiz />} />
             <Route path="/splash" element={<SplashScreen />} />
             <Route path="/legacy" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

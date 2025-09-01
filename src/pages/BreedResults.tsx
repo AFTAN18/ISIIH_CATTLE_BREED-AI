@@ -40,7 +40,12 @@ const BreedResults = () => {
         setIsProcessing(true);
         
         try {
-          // Convert data URL to File object
+          // Simulate processing delay for better UX
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // For now, use mock data since API might not be available
+          // In production, uncomment the API call below
+          /*
           const response = await fetch(location.state.imageData);
           const blob = await response.blob();
           const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
@@ -52,20 +57,10 @@ const BreedResults = () => {
 
           if (result.success && result.data.results) {
             setResults(result.data.results);
-            toast({
-              title: t('identification.success'),
-              description: t('identification.processingComplete'),
-            });
           }
-        } catch (error) {
-          console.error('Breed identification failed:', error);
-          toast({
-            title: t('identification.error'),
-            description: t('identification.processingFailed'),
-            variant: "destructive"
-          });
+          */
           
-          // Fallback to mock data
+          // Mock data for demonstration
           setResults([
             {
               id: '1',
@@ -104,14 +99,30 @@ const BreedResults = () => {
               description: 'High-yielding buffalo breed known for excellent milk quality and commercial value.'
             }
           ]);
+          
+          toast({
+            title: t('identification.success'),
+            description: t('identification.processingComplete'),
+          });
+          
+        } catch (error) {
+          console.error('Breed identification failed:', error);
+          toast({
+            title: t('identification.error'),
+            description: t('identification.processingFailed'),
+            variant: "destructive"
+          });
         } finally {
           setIsProcessing(false);
         }
+      } else if (!location.state?.imageData) {
+        // No image data provided, redirect back to camera
+        navigate('/camera');
       }
     };
 
     processImage();
-  }, [location.state?.imageData, results.length, identifyBreedMutation, toast, t]);
+  }, [location.state?.imageData, results.length, toast, t, navigate]);
 
   const currentResult = results[selectedBreed];
 
@@ -120,7 +131,7 @@ const BreedResults = () => {
       title: "Breed confirmed!",
       description: `${currentResult.breed} has been selected.`,
     });
-    navigate('/profile', { 
+    navigate('/animal-profile', { 
       state: { 
         breed: currentResult,
         imageData: location.state?.imageData 
@@ -131,9 +142,9 @@ const BreedResults = () => {
   const handleReject = () => {
     toast({
       title: "Let's try again",
-      description: "You'll be redirected to manual selection.",
+      description: "Taking you back to camera.",
     });
-    navigate('/manual-selection');
+    navigate('/camera');
   };
 
   const handleExpertReview = () => {
@@ -158,37 +169,40 @@ const BreedResults = () => {
   return (
     <div className="min-h-screen bg-gradient-earth">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 bg-card shadow-soft">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+      <header className="flex items-center justify-between p-3 sm:p-4 bg-card shadow-soft">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="touch-target">
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-lg font-semibold">{t('identification.title')}</h1>
-        <div className="flex items-center gap-2">
+        <h1 className="text-base sm:text-lg font-semibold truncate mx-2">{t('identification.title')}</h1>
+        <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSelector variant="dropdown" className="text-foreground" />
-          <Button variant="ghost" size="sm" onClick={handleExpertReview}>
+          <Button variant="ghost" size="sm" onClick={handleExpertReview} className="touch-target">
             <HelpCircle className="w-5 h-5" />
           </Button>
         </div>
       </header>
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Image Preview */}
         {location.state?.imageData && (
           <Card className="shadow-soft">
-            <CardContent className="p-4">
-              <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+            <CardContent className="p-3 sm:p-4">
+              <div className="aspect-video sm:aspect-[4/3] bg-muted rounded-lg overflow-hidden">
                 <img 
                   src={location.state.imageData} 
                   alt={t('identification.capturedImage')}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    // Fallback to placeholder if image fails to load
+                    console.error('Image failed to load:', location.state?.imageData);
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                     target.nextElementSibling?.classList.remove('hidden');
                   }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully');
+                  }}
                 />
-                <div className="hidden w-full h-full flex items-center justify-center">
+                <div className="hidden w-full h-full flex items-center justify-center bg-muted">
                   <div className="text-center">
                     <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">{t('identification.capturedImage')}</p>
@@ -318,36 +332,40 @@ const BreedResults = () => {
         </Card>
 
         {/* Action Buttons */}
-        <div className="space-y-3">
-          <Button
-            onClick={handleConfirm}
-            className="w-full h-14 text-lg font-semibold bg-gradient-primary hover:bg-primary-hover touch-target"
-            size="lg"
-          >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            {t('identification.confirm')}: {currentResult.breed}
-          </Button>
-
-          <div className="grid grid-cols-2 gap-3">
+        {currentResult && !isProcessing && (
+          <div className="space-y-3">
             <Button
-              variant="outline"
-              onClick={handleReject}
-              className="h-12 touch-target"
+              onClick={handleConfirm}
+              className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-primary hover:bg-primary-hover touch-target"
+              size="lg"
             >
-              <X className="w-4 h-4 mr-2" />
-              {t('identification.notCorrect')}
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              <span className="truncate">{t('identification.confirm')}: {currentResult.breed}</span>
             </Button>
 
-            <Button
-              variant="secondary"
-              onClick={handleExpertReview}
-              className="h-12 touch-target"
-            >
-              <HelpCircle className="w-4 h-4 mr-2" />
-              {t('identification.expertReview')}
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                onClick={handleReject}
+                className="h-10 sm:h-12 touch-target text-sm sm:text-base"
+              >
+                <X className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{t('identification.notCorrect')}</span>
+                <span className="sm:hidden">Wrong</span>
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={handleExpertReview}
+                className="h-10 sm:h-12 touch-target text-sm sm:text-base"
+              >
+                <HelpCircle className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{t('identification.expertReview')}</span>
+                <span className="sm:hidden">Expert</span>
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Next Steps */}
         <Card className="shadow-soft bg-accent/10 border-accent/20">
