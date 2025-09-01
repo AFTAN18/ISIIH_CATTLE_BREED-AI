@@ -1,5 +1,5 @@
 import React from 'react';
-import MLBreedIdentification from '@/components/MLBreedIdentification';
+import MLBreedIdentification from '@/components/MLBreedIdentification.jsx';
 
 const MLIdentification = () => {
   return (

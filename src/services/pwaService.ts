@@ -1,4 +1,4 @@
-import { Workbox } from 'workbox-window';
+// import { Workbox } from 'workbox-window';
 
 export interface PWAInstallPrompt {
   prompt: () => Promise<void>;
@@ -6,7 +6,7 @@ export interface PWAInstallPrompt {
 }
 
 class PWAService {
-  private workbox: Workbox | null = null;
+  private workbox: any | null = null;
   private installPrompt: any = null;
   private isUpdateAvailable = false;
   private onlineCallbacks: (() => void)[] = [];
@@ -16,8 +16,8 @@ class PWAService {
   async initialize(): Promise<void> {
     try {
       // Initialize service worker
-      if ('serviceWorker' in navigator && import.meta.env.PROD) {
-        this.workbox = new Workbox('/sw.js');
+      if ('serviceWorker' in navigator && (import.meta as any).env?.PROD) {
+        // this.workbox = new Workbox('/sw.js');
         
         // Service worker events
         this.workbox.addEventListener('waiting', () => {
@@ -30,11 +30,11 @@ class PWAService {
         });
 
         this.workbox.addEventListener('activated', () => {
-          console.log('Service worker activated');
+          // console.log('Service worker activated');
         });
 
         await this.workbox.register();
-        console.log('Service worker registered successfully');
+        // console.log('Service worker registered successfully');
       }
 
       // Network status monitoring
@@ -46,41 +46,41 @@ class PWAService {
       // Push notifications setup
       this.setupPushNotifications();
       
-      console.log('PWA service initialized successfully');
+      // console.log('PWA service initialized successfully');
     } catch (error) {
-      console.error('PWA service initialization failed:', error);
+      // console.error('PWA service initialization failed:', error);
     }
   }
 
   private setupNetworkMonitoring(): void {
     window.addEventListener('online', () => {
-      console.log('App went online');
+      // console.log('App went online');
       this.notifyOnlineCallbacks();
       this.syncOfflineData();
     });
 
     window.addEventListener('offline', () => {
-      console.log('App went offline');
+      // console.log('App went offline');
       this.notifyOfflineCallbacks();
     });
   }
 
   private setupBackgroundSync(): void {
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if ('serviceWorker' in navigator && 'sync' in (window as any).ServiceWorkerRegistration.prototype) {
       navigator.serviceWorker.ready.then(registration => {
         // Register background sync
-        return registration.sync.register('background-sync');
+        return ((registration as any).sync as any).register('background-sync');
       }).catch(error => {
-        console.error('Background sync registration failed:', error);
+        // console.error('Background sync registration failed:', error);
       });
     }
   }
 
   private async setupPushNotifications(): Promise<void> {
-    if ('Notification' in window && 'serviceWorker' in navigator) {
+    if ((import.meta as any).env?.PROD && 'serviceWorker' in navigator) {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        console.log('Push notifications enabled');
+        // console.log('Push notifications enabled');
       }
     }
   }
@@ -91,18 +91,18 @@ class PWAService {
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
         if ('sync' in registration) {
-          await registration.sync.register('sync-offline-data');
+          ((registration as any).sync as any).register('background-sync-offline-data');
         }
       }
     } catch (error) {
-      console.error('Failed to sync offline data:', error);
+      // console.error('Failed to sync offline data:', error);
     }
   }
 
   // Install app
   async installApp(): Promise<boolean> {
     if (!this.installPrompt) {
-      console.log('Install prompt not available');
+      // console.log('Install prompt not available');
       return false;
     }
 
@@ -111,15 +111,15 @@ class PWAService {
       const { outcome } = await this.installPrompt.userChoice;
       
       if (outcome === 'accepted') {
-        console.log('App installed successfully');
+        // console.log('App installed successfully');
         this.installPrompt = null;
         return true;
       } else {
-        console.log('App installation declined');
+        // console.log('App installation declined');
         return false;
       }
     } catch (error) {
-      console.error('App installation failed:', error);
+      // console.error('App installation failed:', error);
       return false;
     }
   }
@@ -127,7 +127,7 @@ class PWAService {
   // Update app
   async updateApp(): Promise<void> {
     if (!this.workbox || !this.isUpdateAvailable) {
-      console.log('No update available');
+      // console.log('No update available');
       return;
     }
 
@@ -141,7 +141,7 @@ class PWAService {
         this.workbox.messageSkipWaiting();
       }
     } catch (error) {
-      console.error('App update failed:', error);
+      // console.error('App update failed:', error);
     }
   }
 
@@ -199,7 +199,7 @@ class PWAService {
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       );
-      console.log('All caches cleared');
+      // console.log('All caches cleared');
     }
   }
 

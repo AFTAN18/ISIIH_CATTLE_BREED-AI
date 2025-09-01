@@ -88,7 +88,7 @@ const VisualSearch = ({ onBreedSelect }) => {
       characteristics: ['Distinctive hump', 'Pendulous ears', 'Docile nature'],
       origin: 'Gujarat, India',
       confidence: 92,
-      image: '/api/photos/gir_side_adult_male.jpg'
+      image: '/images/breeds/gir.svg'
     },
     {
       id: 'sahiwal',
@@ -104,7 +104,7 @@ const VisualSearch = ({ onBreedSelect }) => {
       characteristics: ['Heat tolerant', 'High milk production', 'Good temperament'],
       origin: 'Punjab, India',
       confidence: 85,
-      image: '/api/photos/sahiwal_side_adult_male.jpg'
+      image: '/images/breeds/sahiwal.svg'
     },
     {
       id: 'murrah',
@@ -120,7 +120,7 @@ const VisualSearch = ({ onBreedSelect }) => {
       characteristics: ['High milk production', 'Good temperament', 'Commercial breed'],
       origin: 'Haryana, India',
       confidence: 88,
-      image: '/api/photos/murrah_side_adult_female.jpg'
+      image: '/images/breeds/murrah.svg'
     },
     {
       id: 'jersey',
@@ -136,7 +136,7 @@ const VisualSearch = ({ onBreedSelect }) => {
       characteristics: ['High butterfat content', 'Efficient feed conversion', 'Adaptable'],
       origin: 'Jersey Island',
       confidence: 78,
-      image: '/api/photos/jersey_side_adult_female.jpg'
+      image: '/images/breeds/holstein.svg'
     }
   ];
 

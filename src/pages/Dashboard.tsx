@@ -245,7 +245,6 @@ const Dashboard = () => {
           ))}
         </div>
 
-          </div>
         </div>
 
         {/* Progress Section */}

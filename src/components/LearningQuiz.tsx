@@ -126,7 +126,7 @@ const LearningQuiz: React.FC = () => {
         id: `img-${i}`,
         type: 'image-identification',
         question: 'Identify the breed shown in this image:',
-        imageUrl: `/api/photos/breed-${breed.name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+        imageUrl: `/images/breeds/${breed.name.toLowerCase().replace(/\s+/g, '-')}.svg`,
         options,
         correctAnswer: options.indexOf(breed.name),
         explanation: `This is ${breed.name}, identifiable by ${breed.characteristics.slice(0, 2).join(' and ')}.`,

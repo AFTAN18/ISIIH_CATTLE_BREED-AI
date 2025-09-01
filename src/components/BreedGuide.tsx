@@ -99,7 +99,7 @@ const BreedGuide: React.FC = () => {
         'Observe reddish coat color',
         'Note the large body size'
       ],
-      imageUrl: '/images/breeds/gir.jpg'
+      imageUrl: '/images/breeds/gir.svg'
     },
     {
       id: 'sahiwal',
@@ -146,7 +146,7 @@ const BreedGuide: React.FC = () => {
         'Observe small or absent hump',
         'Note docile temperament'
       ],
-      imageUrl: '/images/breeds/sahiwal.jpg'
+      imageUrl: '/images/breeds/sahiwal.svg'
     },
     {
       id: 'murrah',
@@ -193,7 +193,7 @@ const BreedGuide: React.FC = () => {
         'Observe large size',
         'Note strong build'
       ],
-      imageUrl: '/images/breeds/murrah.jpg'
+      imageUrl: '/images/breeds/murrah.svg'
     }
   ];
 

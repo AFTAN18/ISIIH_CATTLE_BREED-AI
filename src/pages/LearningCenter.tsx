@@ -176,7 +176,7 @@ const LearningCenter = () => {
         'Too close angle missing body proportions',
         'Poor lighting obscuring coat color'
       ],
-      imageUrl: '/images/breeds/gir.jpg'
+      imageUrl: '/images/breeds/gir.svg'
     },
     {
       id: 'sahiwal',
@@ -199,7 +199,7 @@ const LearningCenter = () => {
         'Harsh lighting altering color perception',
         'Awkward animal positioning'
       ],
-      imageUrl: '/images/breeds/sahiwal.jpg'
+      imageUrl: '/images/breeds/sahiwal.svg'
     },
     {
       id: 'murrah',
@@ -222,7 +222,7 @@ const LearningCenter = () => {
         'Missing horn details in photos',
         'Poor angle hiding body structure'
       ],
-      imageUrl: '/images/breeds/murrah.jpg'
+      imageUrl: '/images/breeds/murrah.svg'
     },
     {
       id: 'holstein',
@@ -245,7 +245,7 @@ const LearningCenter = () => {
         'Incomplete body coverage',
         'Overexposed white patches'
       ],
-      imageUrl: '/images/breeds/holstein.jpg'
+      imageUrl: '/images/breeds/holstein.svg'
     },
     {
       id: 'red-sindhi',
@@ -268,7 +268,7 @@ const LearningCenter = () => {
         'Missing body proportion details',
         'Artificial lighting effects'
       ],
-      imageUrl: '/images/breeds/red-sindhi.jpg'
+      imageUrl: '/images/breeds/red-sindhi.svg'
     },
     {
       id: 'nili-ravi',
@@ -291,7 +291,7 @@ const LearningCenter = () => {
         'Poor marking visibility',
         'Unclear horn photography'
       ],
-      imageUrl: '/images/breeds/nili-ravi.jpg'
+      imageUrl: '/images/breeds/nili-ravi.svg'
     }
   ];
 
